@@ -8,8 +8,9 @@ traces:
   architecture: ["ARCHITECTURE.md#5-implementations"]
 depends_on: ["STEP-T1-040"]
 evidence:
-  commits: []
-  tests: []
+  commits: ["a02a180"]   # start; the workflows commit follows (recorded when the runs are in)
+  tests:
+    - "2026-10-27: `.github/workflows/c-ci.yml` (6 legs: Linux gcc/clang OpenSSL, gcc wolfSSL, gcc package mode; Windows UCRT64 submodule and package mode; every leg checks pin == submodule tag; the package legs fetch the SDK release package, build with no tests, smoke help/--version (the `sdk:` line)/keys types and assert the glibc-only / system-DLL-only link) and `.github/workflows/c-release.yml` (push to main / c-v* tags / dispatch: fetch-sdk.sh + package.sh per platform, artifacts, the release job assembling SHA256SUMS, release-notes.sh, softprops/action-gh-release — named `hem-tool <label>`, pre-release for -rc) written from the SDK's ci.yml / release.yml at 1.2.0. YAML parsed locally. The runs themselves need the user's first push (box 1) and a dispatch/tag (box 2) — recorded here when they are in."
   notes: null
 reopened: []
 cancelled: null

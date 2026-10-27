@@ -1,0 +1,137 @@
+# C release — the one-file hem-tool per platform, built against the SDK's
+# PUBLISHED static package of the pinned version (REQ-PKG-003).
+#
+#   push to main, workflow_dispatch   both platforms built, asserted and
+#                                     packaged; the archives are workflow
+#                                     artifacts labelled <version>+g<sha>
+#   tag c-v<version>[-rc<N>]          the same, then a GitHub Release (a
+#                                     pre-release for -rc) with the two archives
+#                                     and SHA256SUMS; the text = the annotated
+#                                     tag's message + the checksums
+#
+# No dependency prefix is built: the SDK package carries libencedo-hem.a,
+# libcurl.a, libssl.a, libcrypto.a and the headers (fetch-sdk.sh verifies it
+# against the SDK release's SHA256SUMS). The submodule is not needed in
+# package mode. implements: REQ-PKG-003
+
+name: C release
+
+on:
+  push:
+    branches: [main]
+    tags: ['c-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write     # the Release + its assets on tags
+
+jobs:
+  linux:
+    name: Linux x86_64
+    runs-on: ubuntu-22.04      # the SDK package's glibc floor
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential cmake ninja-build pkg-config binutils
+
+      - name: Fetch the SDK package
+        id: sdk
+        run: |
+          c/scripts/release/fetch-sdk.sh linux deps-sdk | tee fetch.log
+          echo "pkg=$(sed -n 's/^SDK package: //p' fetch.log)" >> "$GITHUB_OUTPUT"
+
+      - name: Build, assert, package, smoke-test
+        env:
+          RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/c-v') && github.ref_name || '' }}
+        run: cd c && scripts/release/package.sh "${{ steps.sdk.outputs.pkg }}" linux dist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-linux-x86_64
+          path: |
+            c/dist/*.tar.gz
+            c/dist/SHA256SUMS
+          if-no-files-found: error
+
+  windows:
+    name: Windows x86_64 (MinGW UCRT64)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up MSYS2 / MinGW-w64 (UCRT64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            zip unzip git
+          pacboy: >-
+            toolchain:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+
+      - name: Fetch the SDK package
+        id: sdk
+        run: |
+          c/scripts/release/fetch-sdk.sh windows deps-sdk | tee fetch.log
+          echo "pkg=$(sed -n 's/^SDK package: //p' fetch.log)" >> "$GITHUB_OUTPUT"
+
+      - name: Build, assert, package, smoke-test
+        env:
+          RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/c-v') && github.ref_name || '' }}
+        run: cd c && scripts/release/package.sh "${{ steps.sdk.outputs.pkg }}" windows dist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: release-windows-x86_64
+          path: |
+            c/dist/*.zip
+            c/dist/SHA256SUMS
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release (tags)
+    if: startsWith(github.ref, 'refs/tags/c-v')
+    needs: [linux, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5      # for c/scripts/release/release-notes.sh
+
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Assemble assets + one SHA256SUMS
+        id: assemble
+        run: |
+          mkdir -p release
+          cp artifacts/release-linux-x86_64/*.tar.gz artifacts/release-windows-x86_64/*.zip release/
+          cat artifacts/release-linux-x86_64/SHA256SUMS artifacts/release-windows-x86_64/SHA256SUMS > release/SHA256SUMS
+          test -z "$(awk '{print $2}' release/SHA256SUMS | sort | uniq -d)"   # no asset name twice
+          ( cd release && sha256sum -c SHA256SUMS )
+          ls -l release
+          echo "label=${GITHUB_REF_NAME#c-v}" >> "$GITHUB_OUTPUT"
+
+      # The annotated tag's message + the checksums; a lightweight tag fails
+      # here, before anything is published.
+      - name: Release notes (tag annotation + SHA256SUMS)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: c/scripts/release/release-notes.sh "${{ github.repository }}" "${{ github.ref_name }}" release/SHA256SUMS > release-notes.md
+
+      - name: Publish
+        uses: softprops/action-gh-release@v3
+        with:
+          name: hem-tool ${{ steps.assemble.outputs.label }}
+          files: release/*
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
+          generate_release_notes: false
+          body_path: ${{ github.workspace }}/release-notes.md

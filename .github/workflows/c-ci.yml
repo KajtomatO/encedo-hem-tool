@@ -1,0 +1,188 @@
+# C CI — build the C implementation and run its unit suite on Linux and
+# Windows (MSYS2 UCRT64), in both SDK modes (REQ-PKG-004):
+#   submodule  the SDK built from c/sdk (the pinned tag): gcc, clang, and the
+#              wolfSSL backend on Linux; UCRT64 on Windows — the 23 unit tests
+#              and the gates (ascii_strings, tests_backend_free,
+#              public_api_only, conformance_sync)
+#   package    the shipped shape: hem-tool built against the SDK's PUBLISHED
+#              static package of the pinned version (fetch-sdk.sh), no tests —
+#              the every-push proof of the release link path; the Windows one
+#              proves the runner's GCC links the package's archives
+# implements: REQ-PKG-004, REQ-PKG-002 (the package legs: no SDK source on
+#             any include path)
+#
+# Only the `unit` label runs here: the live tests need the dev HEM and stay
+# local (EHEM_TEST_URL is never set in CI); disruptive tests never run
+# automatically (ARCHITECTURE.md §4).
+
+name: C CI
+
+on:
+  push:
+    paths:
+      - 'c/**'
+      - 'requirements/**'
+      - 'conformance/**'
+      - '.github/workflows/c-ci.yml'
+  pull_request:
+    paths:
+      - 'c/**'
+      - 'requirements/**'
+      - 'conformance/**'
+      - '.github/workflows/c-ci.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: c-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux (${{ matrix.cc }}, ${{ matrix.mode }}${{ matrix.backend && format(', {0}', matrix.backend) || '' }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cc: gcc,   mode: submodule, backend: openssl }
+          - { cc: clang, mode: submodule, backend: openssl }
+          - { cc: gcc,   mode: submodule, backend: wolfssl }
+          - { cc: gcc,   mode: package }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      # The pin (REQ-PKG-001): cmake/sdk-version.cmake, the submodule's tag and
+      # the package the release fetches are one version.
+      - name: Check the SDK pin
+        id: pin
+        run: |
+          pin="$(sed -n -E 's/^set\(HEM_TOOL_SDK_VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+)\).*/\1/p' c/cmake/sdk-version.cmake)"
+          tag="$(git -C c/sdk describe --tags --exact-match)"
+          echo "pin=$pin submodule=$tag"
+          [ "$tag" = "v$pin" ] || { echo "::error::c/sdk is at $tag, the pin says v$pin"; exit 1; }
+          echo "pin=$pin" >> "$GITHUB_OUTPUT"
+
+      # The SDK's own installer (cmake, ninja, pkg-config, libcurl, wolfSSL,
+      # cmocka); the OpenSSL legs add the distro's OpenSSL headers.
+      - name: Install dependencies
+        if: matrix.mode == 'submodule'
+        run: |
+          ./c/sdk/scripts/install-deps-linux.sh --yes
+          sudo apt-get install -y --no-install-recommends libssl-dev
+
+      - name: Install build tools (package mode)
+        if: matrix.mode == 'package'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential cmake ninja-build pkg-config
+
+      - name: Configure and build (submodule mode)
+        if: matrix.mode == 'submodule'
+        run: |
+          cmake -S c -B build -G Ninja -DCMAKE_C_COMPILER=${{ matrix.cc }} -DEHEM_CRYPTO_BACKEND=${{ matrix.backend }}
+          cmake --build build
+
+      - name: Unit tests and gates
+        if: matrix.mode == 'submodule'
+        run: ctest --test-dir build -L unit --output-on-failure
+
+      - name: Fetch the SDK package (package mode)
+        if: matrix.mode == 'package'
+        run: c/scripts/release/fetch-sdk.sh linux deps-sdk
+
+      - name: Configure, build and smoke (package mode)
+        if: matrix.mode == 'package'
+        run: |
+          fail() { echo "::error::$*"; exit 1; }
+          PKG="$PWD/deps-sdk/encedo-hem-${{ steps.pin.outputs.pin }}-linux-x86_64"
+          cmake -S c -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DHEM_TOOL_SDK_MODE=package \
+            -DCMAKE_PREFIX_PATH="$PKG" -DOPENSSL_ROOT_DIR="$PKG" -DOPENSSL_USE_STATIC_LIBS=ON \
+            -DCMAKE_EXE_LINKER_FLAGS=-static-libgcc
+          cmake --build build
+          [ -z "$(ctest --test-dir build -N | grep 'Test #')" ] || fail "package mode built tests"
+          build/hem-tool help > /dev/null
+          build/hem-tool keys types > /dev/null
+          build/hem-tool --version
+          build/hem-tool --version | sed -n 2p | grep -q -x "sdk:       encedo-hem ${{ steps.pin.outputs.pin }}" \
+            || fail "--version does not name SDK ${{ steps.pin.outputs.pin }}"
+          ldd build/hem-tool
+          other="$(ldd build/hem-tool | awk '{print $1}' | sed 's|.*/||' \
+            | grep -E -v '^(linux-vdso\.so\.1|(libc|libm|libpthread|libdl|librt|libresolv)\.so\.[0-9]+|ld-linux-x86-64\.so\.2)$' || true)"
+          [ -z "$other" ] || fail "hem-tool needs a library outside glibc: $other"
+
+  windows:
+    name: Windows (UCRT64, ${{ matrix.mode }})
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { mode: submodule }
+          - { mode: package }
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Set up MSYS2 / MinGW-w64 (UCRT64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git unzip
+          pacboy: >-
+            toolchain:p
+            cmake:p
+            ninja:p
+            pkgconf:p
+            cmocka:p
+            curl:p
+            openssl:p
+
+      - name: Check the SDK pin
+        id: pin
+        run: |
+          pin="$(sed -n -E 's/^set\(HEM_TOOL_SDK_VERSION[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+)\).*/\1/p' c/cmake/sdk-version.cmake)"
+          tag="$(git -C c/sdk describe --tags --exact-match)"
+          echo "pin=$pin submodule=$tag"
+          [ "$tag" = "v$pin" ] || { echo "::error::c/sdk is at $tag, the pin says v$pin"; exit 1; }
+          echo "pin=$pin" >> "$GITHUB_OUTPUT"
+
+      - name: Configure and build (submodule mode)
+        if: matrix.mode == 'submodule'
+        run: |
+          cmake -S c -B build -G Ninja -DEHEM_CRYPTO_BACKEND=openssl
+          cmake --build build
+
+      - name: Unit tests and gates
+        if: matrix.mode == 'submodule'
+        run: ctest --test-dir build -L unit --output-on-failure
+
+      - name: Fetch the SDK package (package mode)
+        if: matrix.mode == 'package'
+        run: c/scripts/release/fetch-sdk.sh windows deps-sdk
+
+      - name: Configure, build and smoke (package mode)
+        if: matrix.mode == 'package'
+        run: |
+          fail() { echo "::error::$*"; exit 1; }
+          PKG="$(cygpath -m "$PWD/deps-sdk/encedo-hem-${{ steps.pin.outputs.pin }}-windows-x86_64")"
+          cmake -S c -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DHEM_TOOL_SDK_MODE=package \
+            -DCMAKE_PREFIX_PATH="$PKG" -DOPENSSL_ROOT_DIR="$PKG" -DOPENSSL_USE_STATIC_LIBS=ON \
+            -DCMAKE_EXE_LINKER_FLAGS=-static
+          cmake --build build
+          build/hem-tool.exe help > /dev/null
+          build/hem-tool.exe keys types > /dev/null
+          build/hem-tool.exe --version
+          build/hem-tool.exe --version | tr -d '\r' | sed -n 2p | grep -q -x "sdk:       encedo-hem ${{ steps.pin.outputs.pin }}" \
+            || fail "--version does not name SDK ${{ steps.pin.outputs.pin }}"
+          objdump -p build/hem-tool.exe | grep 'DLL Name'
+          other="$(objdump -p build/hem-tool.exe | awk '/DLL Name:/ {print tolower($3)}' | sort -u \
+            | grep -E -v '^(api-ms-win-[a-z0-9-]+|ucrtbase|kernel32|advapi32|user32|gdi32|ws2_32|crypt32|bcrypt|secur32|iphlpapi|normaliz|wldap32|ntdll|shell32|ole32|rpcrt4|userenv)\.dll$' || true)"
+          [ -z "$other" ] || fail "hem-tool.exe imports a DLL that is not a Windows system DLL: $other"
