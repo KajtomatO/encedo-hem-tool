@@ -1,0 +1,3 @@
+[submodule "c/sdk"]
+	path = c/sdk
+	url = https://github.com/KajtomatO/encedo-hem-c-api.git

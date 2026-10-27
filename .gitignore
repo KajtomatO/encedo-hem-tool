@@ -1,0 +1,13 @@
+# build trees (c/build, c/build-clang, c/build-pkg, ...)
+build*/
+
+# downloaded SDK packages and release output (c/scripts/release/)
+deps-sdk*/
+dist/
+
+# local secrets (device credentials for the live tests)
+hem.env
+
+# scratch
+tmp/
+__pycache__/

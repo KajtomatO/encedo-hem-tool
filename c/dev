@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+# dev — the developer helper of the C implementation (run from c/).
+#
+#   ./dev build [--clang] [--wolfssl] [--asan]   configure + build (Debug)
+#   ./dev test  [unit|it|all] [--clang] [--wolfssl] [--asan] [-d]
+#                                               unit: offline; it: the live
+#                                               suite (sources ../hem.env or
+#                                               ./hem.env; -d adds disruptive)
+#   ./dev ci                                    unit suite with gcc and clang
+#   ./dev tool <args...>                        build, then run hem-tool with
+#                                               the device credentials sourced
+#   ./dev clean                                 remove the build trees
+#
+# Build trees: build (gcc), build-clang, build-wolfssl, build-asan (and
+# combinations). The SDK comes from the submodule sdk/ (HEM_TOOL_SDK_MODE=
+# submodule); the package-mode release build is scripts/release/package.sh.
+set -euo pipefail
+
+PROG=dev
+cd "$(dirname "$0")"
+
+log()  { printf '\033[1;34m==>\033[0m %s\n' "$*" >&2; }
+die()  { printf '\033[1;31m%s: error:\033[0m %s\n' "$PROG" "$*" >&2; exit 1; }
+run()  { printf '\033[1;30m+\033[0m %s\n' "$*" >&2; "$@"; }
+
+CC_CHOICE=gcc
+BACKEND=openssl
+ASAN=0
+DISRUPTIVE=0
+ARGS=()
+for a in "$@"; do
+  case $a in
+    --clang)   CC_CHOICE=clang ;;
+    --gcc)     CC_CHOICE=gcc ;;
+    --wolfssl) BACKEND=wolfssl ;;
+    --openssl) BACKEND=openssl ;;
+    --asan)    ASAN=1 ;;
+    -d)        DISRUPTIVE=1 ;;
+    *)         ARGS+=("$a") ;;
+  esac
+done
+set -- "${ARGS[@]+"${ARGS[@]}"}"
+
+build_dir() {
+  local d=build
+  [[ $CC_CHOICE == clang ]] && d+="-clang"
+  [[ $BACKEND == wolfssl ]] && d+="-wolfssl"
+  [[ $ASAN == 1 ]] && d+="-asan"
+  printf '%s' "$d"
+}
+
+configure_and_build() {
+  local d; d=$(build_dir)
+  if [[ ! -f $d/CMakeCache.txt ]]; then
+    local cmake_args=(-S . -B "$d" -G Ninja -DEHEM_CRYPTO_BACKEND="$BACKEND")
+    [[ $ASAN == 1 ]] && cmake_args+=(-DEHEM_SANITIZE=ON)
+    CC=$CC_CHOICE run cmake "${cmake_args[@]}"
+  fi
+  run cmake --build "$d" --parallel
+}
+
+source_hem_env() {
+  # Device credentials (EHEM_URL, EHEM_PASSPHRASE, EHEM_TEST_URL ...) live in a
+  # git-ignored hem.env — this repo's or the SDK checkout's beside it.
+  if [[ -z ${EHEM_URL:-} ]]; then
+    for f in ./hem.env ../hem.env ../../encedo-hem-c-api/hem.env; do
+      if [[ -f $f ]]; then
+        log "sourcing $f for device credentials"
+        set -a; . "$f"; set +a
+        break
+      fi
+    done
+  fi
+}
+
+cmd_build() { configure_and_build; }
+
+cmd_test() {
+  local what=${1:-unit}
+  configure_and_build
+  local d; d=$(build_dir)
+  case $what in
+    unit) run ctest --test-dir "$d" -L unit --output-on-failure ;;
+    it)
+      source_hem_env
+      [[ -n ${EHEM_TEST_URL:-} ]] || die "EHEM_TEST_URL is unset (no hem.env found)"
+      # The dev HEM stalls under back-to-back load (the SDK's KNOWN-ISSUES):
+      # pace the requests and retry a stalled test, as the SDK's dev does.
+      EHEM_TEST_PACE_MS="${EHEM_TEST_PACE_MS:-150}" \
+        run ctest --test-dir "$d" -L integration --output-on-failure --no-tests=ignore \
+          --repeat "until-pass:${EHEM_TEST_REPEAT:-3}"
+      if [[ $DISRUPTIVE == 1 ]]; then
+        EHEM_ALLOW_DISRUPTIVE=1 run ctest --test-dir "$d" -L disruptive --output-on-failure
+      fi ;;
+    all) cmd_test unit; cmd_test it ;;
+    *) die "unknown test selection: $what (unit | it | all)" ;;
+  esac
+}
+
+cmd_ci() {
+  for cc in gcc clang; do
+    CC_CHOICE=$cc
+    log "unit suite with $cc ($BACKEND)"
+    cmd_test unit
+  done
+}
+
+cmd_tool() {
+  configure_and_build
+  source_hem_env
+  run "$(build_dir)/hem-tool" "$@"
+}
+
+cmd_clean() { run rm -rf build build-*; }
+
+case ${1:-help} in
+  build) shift; cmd_build "$@" ;;
+  test)  shift; cmd_test "$@" ;;
+  ci)    shift; cmd_ci "$@" ;;
+  tool)  shift; cmd_tool "$@" ;;
+  clean) shift; cmd_clean ;;
+  help|-h|--help) sed -n '2,16p' "$0" ;;
+  *) die "unknown command: $1 (build | test | ci | tool | clean)" ;;
+esac

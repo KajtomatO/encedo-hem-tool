@@ -1,0 +1,69 @@
+{
+  "$comment": "Exit codes of every hem-tool command (REQ-TOOL-003 … 028). Taken from the C implementation at encedo-hem-c-api 1.2.0: the per-command enumerations in its headers and the registry's help texts. The `common` codes apply to every command; a command lists only its own additional codes. Scripts rely on these numbers.",
+  "common": {
+    "0": "success",
+    "1": "failure — the message says which (device, cloud or login error)",
+    "2": "usage error — bad arguments, missing passphrase or environment",
+    "12": "the SDK could not be initialised: its crypto library is missing or not the one it was built against (REQ-TOOL-024); printed before any command runs",
+    "13": "--mobile: the push was not answered in time",
+    "14": "--mobile: the push was rejected on the phone"
+  },
+  "commands": {
+    "status": {},
+    "checkin": {},
+    "cert-install": {
+      "3": "no certificate chain delivered and no current serial to compare",
+      "4": "the check-in handshake itself failed",
+      "5": "the harvested chain would not parse",
+      "6": "login / authorization rejected",
+      "7": "the device rejected the certificate",
+      "8": "the reboot request failed",
+      "9": "the device never returned after the reboot"
+    },
+    "tls-recover": {
+      "3": "the provisioning cloud delivered no usable bundle",
+      "4": "the device did not return serving HTTPS"
+    },
+    "recovery": {
+      "3": "expired certificate and the cloud delivered no renewal (one attempt per run)",
+      "4": "neither https nor http answers, or a bounded wait ran out",
+      "5": "a TLS failure that is not an expired certificate (hostname, CA)"
+    },
+    "keys list": {},
+    "keys rm": {},
+    "keys pub": { "$comment": "symmetric keys have no public material and still exit 0" },
+    "keys gen": {},
+    "keys update": {},
+    "keys types": { "2": "unknown TYPE (the valid names are printed)" },
+    "sign": {},
+    "random": { "1": "also: the transient key could not be removed afterwards" },
+    "logs": {},
+    "selftest": { "3": "the battery ran but the device reports a fault (fls_state != 0)" },
+    "reboot": {},
+    "ext pair": {
+      "3": "the QR was not scanned in time",
+      "4": "the device refused the pairing (406: slots full / already paired)"
+    },
+    "ext list": {},
+    "ext login": {
+      "3": "the push was not answered in time",
+      "4": "rejected on the phone",
+      "5": "no paired authenticator (the optional pre-check)"
+    },
+    "init-device": {
+      "3": "the device is already initialised (406)",
+      "4": "the RTC is still unset after the check-in (403)",
+      "5": "the configuration was rejected by the device (400)"
+    },
+    "init-wizard": {
+      "3": "the device is already initialised (406)",
+      "4": "the RTC is still unset after the check-in (403)",
+      "5": "the configuration was rejected by the device (400)",
+      "6": "cancelled by the operator (end of input, or declined at the summary)"
+    },
+    "wipe-device": {
+      "3": "declined — the typed hostname did not confirm",
+      "4": "--wait: the device did not answer again after the wipe"
+    }
+  }
+}

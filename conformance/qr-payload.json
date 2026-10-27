@@ -1,0 +1,36 @@
+{
+  "$comment": "The pairing QR payload every hem-tool implementation renders (REQ-TOOL-016 via the SDK's ehem_ext_qr_payload / the Manager's pairdeviceNow): compact JSON, keys in this order, hash = standard base64 (padded) of SHA-256 over the raw `request` string from ext/init. The phone fetches `link`, hashes the request the broker serves and refuses a mismatch. Known answers below; `expected` is the exact byte string.",
+  "vectors": [
+    {
+      "name": "fips-180-2-abc",
+      "link": "https://l.ink/x",
+      "request": "abc",
+      "user": "Alice",
+      "email": "a@example.com",
+      "hostname": "hem.example",
+      "hash": "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=",
+      "expected": "{\"link\":\"https://l.ink/x\",\"hash\":\"ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=\",\"user\":\"Alice\",\"email\":\"a@example.com\",\"hostname\":\"hem.example\"}"
+    },
+    {
+      "name": "scripted-request-r.j.w",
+      "link": "https://l.ink/x",
+      "request": "r.j.w",
+      "user": "Alice",
+      "email": "a@example.com",
+      "hostname": "hem.example",
+      "hash": "BQixETmS1vjcSjAPqjT0yq9poZjfeTnWczNU6VHYuI4=",
+      "expected": "{\"link\":\"https://l.ink/x\",\"hash\":\"BQixETmS1vjcSjAPqjT0yq9poZjfeTnWczNU6VHYuI4=\",\"user\":\"Alice\",\"email\":\"a@example.com\",\"hostname\":\"hem.example\"}"
+    },
+    {
+      "name": "escaping-and-empty-fields",
+      "link": "L",
+      "request": "r.j.w",
+      "user": "A \"B\" \\ C",
+      "email": null,
+      "hostname": null,
+      "hash": "BQixETmS1vjcSjAPqjT0yq9poZjfeTnWczNU6VHYuI4=",
+      "expected": "{\"link\":\"L\",\"hash\":\"BQixETmS1vjcSjAPqjT0yq9poZjfeTnWczNU6VHYuI4=\",\"user\":\"A \\\"B\\\" \\\\ C\",\"email\":\"\",\"hostname\":\"\"}",
+      "$comment": "null config fields render as empty strings; `\"` and `\\` are escaped, `/` is not"
+    }
+  ]
+}
