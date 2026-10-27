@@ -92,7 +92,7 @@ are handled before the REQ-TOOL-024 init, so they run on any library.
       (test_registry test_top_page_shape stays green).
       *(Usage line 3 now ends `|   hem-tool --version`; the page stays 43
       lines; test_top_page_shape asserts `hem-tool --version`.)*
-- [ ] Rev 6 (STEP-T1-030): four lines — `hem-tool <tool version>` first,
+- [x] Rev 6 (STEP-T1-030, 2026-10-27 — test_version_report, tool_startup_cli green on gcc/clang, OpenSSL/wolfSSL): four lines — `hem-tool <tool version>` first,
       `sdk:       encedo-hem <SDK version>` second, the two versions
       different values; the help header shows the tool version — unit
       (`test_version_report`) and the real binary (`tool_startup_cli`, both

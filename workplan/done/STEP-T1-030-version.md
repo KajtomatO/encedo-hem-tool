@@ -8,8 +8,9 @@ traces:
   architecture: ["ARCHITECTURE.md#3-the-cli", "ARCHITECTURE.md#5-implementations"]
 depends_on: ["STEP-T1-020"]
 evidence:
-  commits: []
-  tests: []
+  commits: ["e8e0ff9", "65ff2f3"]   # start, implementation; the done commit follows
+  tests:
+    - "2026-10-27: test_tool_startup `test_version_report` (four lines, the first two exact — `hem-tool <HEM_TOOL_VERSION_STRING>` / `sdk:       encedo-hem <ehem_version()>`, the two versions different), `test_version_refusal_message` and `test_static_refusal_message` (the dynamic-link remedy: `install the <backend> <version> library hem-tool was built against … needs no separate one`, no asset name); `tool_startup_cli` on the real main.c (`--version`, `version`, `--version status`, `status --version`: four lines, `hem-tool 1.3.0` / `sdk:       encedo-hem 1.2.0`, both versions passed from CMake). Suites: `ctest -L unit` 23/23 (gcc, OpenSSL), `./dev ci` 23/23 gcc + 23/23 clang, `./dev test unit --wolfssl` 23/23. `build/hem-tool --version` → `hem-tool 1.3.0` / `sdk:       encedo-hem 1.2.0` / crypto / transport; `--help` header `hem-tool 1.3.0 - Encedo HEM device CLI`."
   notes: null
 reopened: []
 cancelled: null
@@ -33,9 +34,10 @@ header takes `hem_tool_version()`), `test_tool_startup.c` (four lines, the
 release packaging asserts (STEP-T1-040).
 
 **Definition of done**
-- [ ] `build/hem-tool --version` → the four lines; `hem-tool --help` header
+- [x] `build/hem-tool --version` → the four lines; `hem-tool --help` header
       `hem-tool 1.3.0 - Encedo HEM device CLI`.
-- [ ] REQ-TOOL-025 rev (meaning change approved with the plan 2026-10-27)
-      and REQ-TOOL-024 rev texts updated; the C cells `needs-reverify` until
-      the tests pass again.
-- [ ] Unit suite green (gcc + clang, both backends).
+- [x] REQ-TOOL-025 rev 6 and REQ-TOOL-024 rev 10 (meaning changes approved
+      with the plan 2026-10-27) — texts updated, new criteria ticked by the
+      tests above; the C cells go straight back to verified (the rework and
+      its tests landed in the same step).
+- [x] Unit suite green (gcc + clang, both backends).

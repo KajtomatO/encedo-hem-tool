@@ -187,7 +187,7 @@ package links wolfSSL statically) says that the build itself is broken.
       lines, test_registry asserts `exit 12`; `scripts/release/package.sh`
       README.txt paragraph "hem-tool checks the wolfSSL it loaded …" and
       the job log runs `hem-tool --version`.)*
-- [ ] Rev 10 (STEP-T1-030): the dynamic-link remedy names the library
+- [x] Rev 10 (STEP-T1-030, 2026-10-27 — green on gcc/clang, OpenSSL/wolfSSL): the dynamic-link remedy names the library
       hem-tool was built against and no release asset (`test_version_refusal_message`
       on a dynamic build, `test_static_refusal_message`'s dynamic cases);
       the linked-in remedies and `tool_startup_cli` unchanged — green on
