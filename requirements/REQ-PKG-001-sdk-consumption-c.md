@@ -56,5 +56,9 @@ proved. One pin keeps the two modes honest with each other.
       checksum OK; package.sh configured package mode ("tests OFF" notice),
       built the one-file binary — ldd glibc only — and its `--version`
       reads `sdk:       encedo-hem 1.2.0`.)*
-- [ ] CI asserts pin == submodule tag == fetched package version on every
-      run (STEP-T1-050).
+- [x] CI asserts pin == submodule tag == fetched package version on every
+      run (STEP-T1-050). *(2026-10-27: every leg of C CI run 40529996276
+      ran the "Check the SDK pin" step — `pin=1.2.0 submodule=v1.2.0`; the
+      package legs and the release run 40530024709 fetched
+      `encedo-hem-1.2.0-<os>-x86_64`, whose config-version package.sh
+      compared with the pin.)*

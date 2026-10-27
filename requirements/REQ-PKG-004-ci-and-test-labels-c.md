@@ -43,5 +43,7 @@ package-mode legs are the early, every-push proof of the release link path
       (77) without `EHEM_TEST_URL` *(local 2026-10-27: 21 unit tests green
       on gcc/clang, OpenSSL/wolfSSL; the two integration tests green against
       the dev device — STEP-T1-010)*.
-- [ ] `c-ci.yml` — 6 legs green on the user's first push (run id recorded;
-      STEP-T1-050).
+- [x] `c-ci.yml` — 6 legs green on the user's first push (run id recorded;
+      STEP-T1-050). *(2026-10-27, run 40529996276 on 7d7c84e: Linux gcc /
+      clang / wolfSSL submodule legs and the package leg, Windows UCRT64
+      submodule and package legs — 6/6; every leg's pin check passed.)*

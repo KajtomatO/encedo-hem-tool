@@ -70,9 +70,13 @@ packaging checks, carried over so the split loses no guarantee.
       `status` on a closed port exit 1, the null-provider `OPENSSL_CONF`
       exit 12 with the configuration remedy; SHA256SUMS written. The
       Windows half and the tag rule run in the workflows (STEP-T1-050).)*
-- [ ] `c-release.yml`: a `workflow_dispatch` run yields the two archives +
-      `SHA256SUMS` as artifacts; the user's `c-v1.3.0-rc1` publishes the
-      pre-release with 3 assets (run id, release id recorded; STEP-T1-050/070).
+- [ ] `c-release.yml`: a branch run yields the two archives + `SHA256SUMS`
+      as artifacts; the user's `c-v1.3.0-rc1` publishes the pre-release with
+      3 assets (run id, release id recorded; STEP-T1-050/070). *(Half met
+      2026-10-27: the push to `main` ran 40530024709 — Linux 0:23, Windows
+      2:25, every assert of package.sh green on both platforms, artifacts
+      release-linux-x86_64 and release-windows-x86_64, the publish job
+      skipped as designed. The tag half is STEP-T1-070's.)*
 - [ ] Attended (the user, STEP-T1-070): the published Linux and Windows
       binaries run `status` under system trust, `--version` shows the SDK
       pin, `ext list` works — recorded here.

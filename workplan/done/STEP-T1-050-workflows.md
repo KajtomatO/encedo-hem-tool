@@ -8,10 +8,11 @@ traces:
   architecture: ["ARCHITECTURE.md#5-implementations"]
 depends_on: ["STEP-T1-040"]
 evidence:
-  commits: ["a02a180"]   # start; the workflows commit follows (recorded when the runs are in)
+  commits: ["a02a180", "7d7c84e"]   # start, the workflows; the done commit follows
   tests:
     - "2026-10-27: `.github/workflows/c-ci.yml` (6 legs: Linux gcc/clang OpenSSL, gcc wolfSSL, gcc package mode; Windows UCRT64 submodule and package mode; every leg checks pin == submodule tag; the package legs fetch the SDK release package, build with no tests, smoke help/--version (the `sdk:` line)/keys types and assert the glibc-only / system-DLL-only link) and `.github/workflows/c-release.yml` (push to main / c-v* tags / dispatch: fetch-sdk.sh + package.sh per platform, artifacts, the release job assembling SHA256SUMS, release-notes.sh, softprops/action-gh-release — named `hem-tool <label>`, pre-release for -rc) written from the SDK's ci.yml / release.yml at 1.2.0. YAML parsed locally. The runs themselves need the user's first push (box 1) and a dispatch/tag (box 2) — recorded here when they are in."
-  notes: null
+    - "2026-10-27, the user's first push (7d7c84e to development, then development → main): C CI run 40529996276 — 6/6 legs green: Linux (gcc, submodule, openssl) 0:41, Linux (clang, submodule, openssl) 5:04, Linux (gcc, submodule, wolfssl) 6:19, Linux (gcc, package) 0:22, Windows (UCRT64, submodule) 2:12, Windows (UCRT64, package) 2:21 — the Windows package leg links the SDK package's archives with the runner's MSYS2 GCC (ARCHITECTURE §8 risk 1 retired). C release run 40530024709 on the push to main (the dry run, label 1.3.0+g7d7c84e): Linux x86_64 0:23 and Windows x86_64 (MinGW UCRT64) 2:25 green — fetch-sdk.sh, package.sh with every assert on both platforms — artifacts release-linux-x86_64 (3.09 MB) and release-windows-x86_64 (3.07 MB); the publish job skipped, as designed for a branch push."
+  notes: "Done 2026-10-27. The tag path (c-v1.3.0-rc1 → pre-release) is STEP-T1-070's."
 reopened: []
 cancelled: null
 ---
@@ -32,8 +33,8 @@ minutes. Runners `ubuntu-22.04` (the SDK package's glibc floor) and
 `windows-latest`. The first push and the tags are the user's.
 
 **Definition of done**
-- [ ] `c-ci.yml`: 6 legs green on the user's first push.
-- [ ] `c-release.yml`: a `workflow_dispatch` run produces the two archives
-      and `SHA256SUMS` as artifacts; a `c-v1.3.0-rc1` tag publishes a
-      pre-release (STEP-T1-070's gate).
-- [ ] REQ-PKG-004 criteria recorded with the run ids.
+- [x] `c-ci.yml`: 6 legs green on the user's first push (run 40529996276).
+- [x] `c-release.yml`: a branch-push run (main, 40530024709) produces the two
+      archives and `SHA256SUMS` as artifacts on both platforms; the
+      `c-v1.3.0-rc1` pre-release is STEP-T1-070's gate.
+- [x] REQ-PKG-004 and REQ-PKG-001/003 criteria recorded with the run ids.
