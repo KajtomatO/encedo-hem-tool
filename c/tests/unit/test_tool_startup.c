@@ -124,18 +124,15 @@ static void test_version_refusal_message(void **state)
         assert_null(strstr(s, "one-file hem-tool"));
         assert_non_null(strstr(s, "is linked into hem-tool"));
     } else {
-        /* REQ-TOOL-024 rev 7: the one-file hem-tool, by its release name —
-         * the plain hem-tool-<version>-<os>-x86_64 asset (REQ-BUILD-009) */
-        char asset[80];
-        assert_non_null(strstr(s, "one-file hem-tool"));
-        snprintf(asset, sizeof asset, "hem-tool-%s-", ehem_version());
-        assert_non_null(strstr(s, asset));
-        assert_non_null(strstr(s, "-x86_64 (1.2.0 and later)"));
-        if (strcmp(bi.crypto_backend, "wolfSSL") == 0) {
-            /* the companion asset, by its release name */
-            snprintf(asset, sizeof asset, "wolfssl-%s-", bi.crypto_version_compiled);
-            assert_non_null(strstr(s, asset));
-        }
+        /* REQ-TOOL-024 rev 10: a dynamically linked library (a from-source
+         * build) - install the one hem-tool was built against; no release
+         * asset is named (the released hem-tool links its library in) */
+        assert_non_null(strstr(s, "library hem-tool was built"));
+        assert_non_null(strstr(s, bi.crypto_version_compiled));
+        assert_non_null(strstr(s, "linked in and"));
+        assert_null(strstr(s, "one-file hem-tool"));
+        assert_null(strstr(s, "wolfssl-"));
+        assert_null(strstr(s, "x86_64"));
     }
     assert_ascii(s);
     free(s);
@@ -194,11 +191,14 @@ static void test_static_refusal_message(void **state)
     assert_ascii(s);
     free(s);
 
-    /* the same facts, linked dynamically: the replace-the-library remedies */
+    /* the same facts, linked dynamically: the install-the-library remedy
+     * (rev 10 - no release asset named) */
     bi.crypto_link = "dynamic";
     s = refusal_for(&bi);
-    assert_non_null(strstr(s, "wolfssl-5.7.2-"));
-    assert_non_null(strstr(s, "one-file hem-tool"));
+    assert_non_null(strstr(s, "install the wolfSSL 5.7.2 library"));
+    assert_non_null(strstr(s, "needs no separate one"));
+    assert_null(strstr(s, "wolfssl-5.7.2-"));
+    assert_null(strstr(s, "one-file hem-tool"));
     free(s);
     bi.crypto_backend = "OpenSSL";
     bi.crypto_version_compiled = "3.5.9";
@@ -206,7 +206,7 @@ static void test_static_refusal_message(void **state)
     s = refusal_for(&bi);
     assert_non_null(strstr(s, "OpenSSL: built against 3.5.9, loaded 3.0.13\n"));
     assert_non_null(strstr(s, "install the OpenSSL 3.5.9 library"));
-    assert_non_null(strstr(s, "one-file hem-tool"));
+    assert_null(strstr(s, "one-file hem-tool"));
     free(s);
 }
 
@@ -237,8 +237,10 @@ static void test_refusal_then_ok(void **state)
     free(s);
 }
 
-/* --version: three lines, values from ehem_version() + ehem_build_info_get();
- * works under a forced mismatch (it never initialises). */
+/* --version: four lines — the tool's own version (HEM_TOOL_VERSION_STRING,
+ * REQ-TOOL-025 rev 6), the SDK's (ehem_version()), then the two
+ * ehem_build_info_get() lines; works under a forced mismatch (it never
+ * initialises). */
 static void test_version_report(void **state)
 {
     (void)state;
@@ -254,9 +256,12 @@ static void test_version_report(void **state)
     fclose(out);
 
     ehem_build_info_get(&bi);
-    assert_int_equal(count(s, "\n"), 3);
-    snprintf(expect, sizeof expect, "hem-tool %s\n", ehem_version());
-    assert_memory_equal(s, expect, strlen(expect));     /* first line, exact */
+    assert_int_equal(count(s, "\n"), 4);
+    assert_string_equal(hem_tool_version(), HEM_TOOL_VERSION_STRING);
+    assert_string_not_equal(hem_tool_version(), ehem_version());  /* two versions */
+    snprintf(expect, sizeof expect, "hem-tool %s\nsdk:       encedo-hem %s\n",
+             hem_tool_version(), ehem_version());
+    assert_memory_equal(s, expect, strlen(expect));     /* first two lines, exact */
     snprintf(expect, sizeof expect,
              "crypto:    %s %s (compiled) / %s (loaded), %s\n",
              bi.crypto_backend, bi.crypto_version_compiled,

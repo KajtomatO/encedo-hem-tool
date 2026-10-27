@@ -8,15 +8,6 @@
 
 #include <string.h>
 
-/* The <os> part of the release's asset names: the companion
- * wolfssl-<version>-<os>-x86_64 (REQ-BUILD-005) and the one-file
- * hem-tool-<version>-<os>-x86_64 (REQ-BUILD-009). */
-#ifdef _WIN32
-#define HEM_RELEASE_OS "windows"
-#else
-#define HEM_RELEASE_OS "linux"
-#endif
-
 int hem_tool_global_init(FILE *err)
 {
     ehem_build_info bi;
@@ -69,27 +60,21 @@ void hem_tool_print_refusal(FILE *err, const ehem_build_info *bi)
                          "          this hem-tool build is broken\n",
                     bi->crypto_backend);
         }
-    } else if (strcmp(bi->crypto_backend, "wolfSSL") == 0) {
-        /* The one-file hem-tool is the plain asset of the release (REQ-BUILD-009,
-         * user decision 2026-10-19); this binary is its -shared sibling. */
-        fprintf(err, "  remedy: put the wolfSSL library from the release asset "
-                     "wolfssl-%s-%s-x86_64\n"
-                     "          next to hem-tool, or use the one-file hem-tool "
-                     "asset\n"
-                     "          hem-tool-%s-%s-x86_64 (1.2.0 and later), which "
-                     "needs no separate\n"
-                     "          crypto library\n",
-                bi->crypto_version_compiled, HEM_RELEASE_OS,
-                ehem_version(), HEM_RELEASE_OS);
     } else {
+        /* A dynamic library: a from-source build picked up another one. The
+         * released hem-tool has its crypto library linked in (REQ-PKG-003),
+         * so it never reaches this branch. */
         fprintf(err, "  remedy: install the %s %s library hem-tool was built "
-                     "against, or use the\n"
-                     "          one-file hem-tool asset hem-tool-%s-%s-x86_64 "
-                     "(1.2.0 and later),\n"
-                     "          which needs no separate crypto library\n",
-                bi->crypto_backend, bi->crypto_version_compiled,
-                ehem_version(), HEM_RELEASE_OS);
+                     "against; a released\n"
+                     "          hem-tool has its crypto library linked in and "
+                     "needs no separate one\n",
+                bi->crypto_backend, bi->crypto_version_compiled);
     }
+}
+
+const char *hem_tool_version(void)
+{
+    return HEM_TOOL_VERSION_STRING;
 }
 
 void hem_tool_print_version(FILE *out)
@@ -100,7 +85,8 @@ void hem_tool_print_version(FILE *out)
         out = stdout;
     }
     ehem_build_info_get(&bi);
-    fprintf(out, "hem-tool %s\n", ehem_version());
+    fprintf(out, "hem-tool %s\n", hem_tool_version());
+    fprintf(out, "sdk:       encedo-hem %s\n", ehem_version());
     fprintf(out, "crypto:    %s %s (compiled) / %s (loaded), %s\n",
             bi.crypto_backend, bi.crypto_version_compiled,
             bi.crypto_version_loaded, bi.crypto_link);

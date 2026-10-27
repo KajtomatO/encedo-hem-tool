@@ -47,6 +47,7 @@ target_compile_options(hem-tool-forced-mismatch PRIVATE ${HEM_WARNING_FLAGS})
 add_test(NAME tool_startup_cli
   COMMAND ${CMAKE_COMMAND}
     -DEHEM_TOOL=$<TARGET_FILE:hem-tool-forced-mismatch>
+    -DHEM_TOOL_VERSION=${PROJECT_VERSION}
     -DEHEM_VERSION=${HEM_TOOL_SDK_VERSION}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check_tool_startup.cmake)
 set_tests_properties(tool_startup_cli PROPERTIES LABELS unit)
