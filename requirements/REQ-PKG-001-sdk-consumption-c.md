@@ -42,14 +42,19 @@ should link exactly what the SDK released and what its consumer gate
 proved. One pin keeps the two modes honest with each other.
 
 **Acceptance criteria:**
-- [ ] Submodule mode: `cmake -S c -B build` with `c/sdk` at `v1.2.0`
+- [x] Submodule mode: `cmake -S c -B build` with `c/sdk` at `v1.2.0`
       configures, builds `hem-tool` and the test suite; `ctest -N` lists
       no SDK test; with the submodule at another tag the configure step
       fails naming both versions. *(Local 2026-10-27: configure + build +
-      21/21 unit tests, gcc and clang, OpenSSL and wolfSSL — STEP-T1-010.)*
-- [ ] Package mode: against the unpacked `encedo-hem-1.2.0-<os>-x86_64`
+      21/21 unit tests, gcc and clang, OpenSSL and wolfSSL — STEP-T1-010;
+      23/23 with the two added gates — STEP-T1-020/030; `ctest -N` lists
+      the tool's 23 tests and no SDK test.)*
+- [x] Package mode: against the unpacked `encedo-hem-1.2.0-<os>-x86_64`
       package, `-DHEM_TOOL_SDK_MODE=package` configures without `c/sdk` on
       any include path, builds `hem-tool`, and `HEM_TOOL_BUILD_TESTS` is
-      forced off (STEP-T1-040).
+      forced off (STEP-T1-040). *(Local 2026-10-27, Linux: fetch-sdk.sh →
+      checksum OK; package.sh configured package mode ("tests OFF" notice),
+      built the one-file binary — ldd glibc only — and its `--version`
+      reads `sdk:       encedo-hem 1.2.0`.)*
 - [ ] CI asserts pin == submodule tag == fetched package version on every
       run (STEP-T1-050).

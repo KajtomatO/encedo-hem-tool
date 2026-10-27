@@ -8,8 +8,9 @@ traces:
   architecture: ["ARCHITECTURE.md#5-implementations"]
 depends_on: ["STEP-T1-030"]
 evidence:
-  commits: []
-  tests: []
+  commits: ["2381efd"]   # start; the implementation commit follows (recorded at done)
+  tests:
+    - "2026-10-27, Linux (gcc 13.3, the published encedo-hem-1.2.0-linux-x86_64 package): `scripts/release/fetch-sdk.sh linux deps-sdk` — pin 1.2.0 read from cmake/sdk-version.cmake, checksum OK against the SDK release's SHA256SUMS, package unpacked into the new directory. `scripts/release/package.sh deps-sdk/encedo-hem-1.2.0-linux-x86_64 linux dist` — label `1.3.0+g2381efd`; the package's config-version 1.2.0 == the pin; package-mode configure (tests OFF) finding CURL in the package's lib/cmake and OpenSSL in the package; `ldd` glibc-family only, no RUNPATH; no wolfSSL symbol/string; the four `--version` lines exact; archive + README.txt + 7 LICENSES; smoke from an empty directory: one hem-tool file, help/keys types exit 0, closed-port status exit 1, null-provider OPENSSL_CONF exit 12 with the configuration remedy; SHA256SUMS written. REQ-PKG-001 package-mode criterion and REQ-PKG-003's two script criteria ticked."
   notes: null
 reopened: []
 cancelled: null
@@ -40,12 +41,12 @@ header (presence-checked). `release-notes.sh` copied from the SDK
 unchanged (it reads the annotated tag by name).
 
 **Definition of done**
-- [ ] `fetch-sdk.sh 1.2.0 linux deps-sdk` → checksum OK, package unpacked;
-      the version read from `cmake/sdk-version.cmake`.
-- [ ] `cmake -DHEM_TOOL_SDK_MODE=package -DCMAKE_PREFIX_PATH=deps-sdk/...`
+- [x] `fetch-sdk.sh linux deps-sdk` → checksum OK, package unpacked; the
+      version read from `cmake/sdk-version.cmake`.
+- [x] `cmake -DHEM_TOOL_SDK_MODE=package -DCMAKE_PREFIX_PATH=deps-sdk/...`
       configures and builds `hem-tool` with tests OFF; `ldd` glibc only.
-- [ ] `package.sh deps-sdk linux dist` → `dist/hem-tool-1.3.0+g<sha>-linux-x86_64.tar.gz`
+- [x] `package.sh deps-sdk/… linux dist` → `dist/hem-tool-1.3.0+g2381efd-linux-x86_64.tar.gz`
       + `SHA256SUMS`, every assert green, the archive's README.txt names the
       SDK version.
-- [ ] REQ-PKG-003 criteria recorded; the Windows half is the CI/release
+- [x] REQ-PKG-003 criteria recorded; the Windows half is the CI/release
       job's (STEP-T1-050).

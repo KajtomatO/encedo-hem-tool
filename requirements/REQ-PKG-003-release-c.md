@@ -47,14 +47,29 @@ rather than a parallel dependency build. The asserts are the SDK's one-file
 packaging checks, carried over so the split loses no guarantee.
 
 **Acceptance criteria:**
-- [ ] `c/scripts/release/fetch-sdk.sh <version> <os> <dir>` downloads the
+- [x] `c/scripts/release/fetch-sdk.sh <version> <os> <dir>` downloads the
       SDK package and `SHA256SUMS`, verifies, unpacks into an empty
       directory; the version read from `c/cmake/sdk-version.cmake`
-      (STEP-T1-040).
-- [ ] `c/scripts/release/package.sh` enforces the tag rule, builds in
+      (STEP-T1-040). *(2026-10-27: `fetch-sdk.sh linux deps-sdk` → the pin
+      1.2.0 taken from the cmake file, `encedo-hem-1.2.0-linux-x86_64.tar.gz:
+      OK` against the release's SHA256SUMS, the package unpacked, the
+      archive removed; a non-empty target directory is refused.)*
+- [x] `c/scripts/release/package.sh` enforces the tag rule, builds in
       package mode, runs every assert above, writes the archive and
       `SHA256SUMS`; local run against the published 1.2.0 Linux package
-      recorded (STEP-T1-040).
+      recorded (STEP-T1-040). *(2026-10-27, Linux, no tag → label
+      `1.3.0+g2381efd`: the SDK package's config-version 1.2.0 matched the
+      pin; package mode built; `ldd` = linux-vdso, libc, ld-linux only, no
+      RUNPATH; no wolfSSL symbol or string; `--version` exactly `hem-tool
+      1.3.0` / `sdk:       encedo-hem 1.2.0` / `crypto:    OpenSSL 3.5.9
+      (compiled) / 3.5.9 (loaded), static` / `transport: libcurl 8.10.1
+      (compiled) / 8.10.1 (loaded), static`; archive
+      `hem-tool-1.3.0+g2381efd-linux-x86_64.tar.gz` with README.txt (SDK
+      version named, glibc floor) and seven LICENSES; smoke from an empty
+      directory: one hem-tool file, `help` and `keys types` exit 0,
+      `status` on a closed port exit 1, the null-provider `OPENSSL_CONF`
+      exit 12 with the configuration remedy; SHA256SUMS written. The
+      Windows half and the tag rule run in the workflows (STEP-T1-050).)*
 - [ ] `c-release.yml`: a `workflow_dispatch` run yields the two archives +
       `SHA256SUMS` as artifacts; the user's `c-v1.3.0-rc1` publishes the
       pre-release with 3 assets (run id, release id recorded; STEP-T1-050/070).
