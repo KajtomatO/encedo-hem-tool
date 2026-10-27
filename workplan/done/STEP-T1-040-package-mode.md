@@ -8,7 +8,7 @@ traces:
   architecture: ["ARCHITECTURE.md#5-implementations"]
 depends_on: ["STEP-T1-030"]
 evidence:
-  commits: ["2381efd"]   # start; the implementation commit follows (recorded at done)
+  commits: ["2381efd", "fadf9c4"]   # start, implementation; the done commit follows
   tests:
     - "2026-10-27, Linux (gcc 13.3, the published encedo-hem-1.2.0-linux-x86_64 package): `scripts/release/fetch-sdk.sh linux deps-sdk` — pin 1.2.0 read from cmake/sdk-version.cmake, checksum OK against the SDK release's SHA256SUMS, package unpacked into the new directory. `scripts/release/package.sh deps-sdk/encedo-hem-1.2.0-linux-x86_64 linux dist` — label `1.3.0+g2381efd`; the package's config-version 1.2.0 == the pin; package-mode configure (tests OFF) finding CURL in the package's lib/cmake and OpenSSL in the package; `ldd` glibc-family only, no RUNPATH; no wolfSSL symbol/string; the four `--version` lines exact; archive + README.txt + 7 LICENSES; smoke from an empty directory: one hem-tool file, help/keys types exit 0, closed-port status exit 1, null-provider OPENSSL_CONF exit 12 with the configuration remedy; SHA256SUMS written. REQ-PKG-001 package-mode criterion and REQ-PKG-003's two script criteria ticked."
   notes: null

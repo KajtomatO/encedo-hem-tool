@@ -2,7 +2,7 @@
 
 # Generation stamp: what happened since the last matrix.
 STAMP = (
-    "Generated: 2026-10-27 (STEP-T1-030 DONE — hem-tool 1.3.0: the tool's own version, `--version` with the `sdk:` line, the remedies without release assets (REQ-TOOL-025 rev 6, REQ-TOOL-024 rev 10 — meaning changes approved with the plan, re-verified in the same step). Before: STEP-T1-010/020 — the C "
+    "Generated: 2026-10-27 (STEP-T1-040 DONE — package mode: fetch-sdk.sh + package.sh, the one-file build against the published SDK 1.2.0 package proven locally on Linux with every release assert (REQ-PKG-003 opens its C cell). Before: STEP-T1-030 — hem-tool 1.3.0: the tool's own version, `--version` with the `sdk:` line, the remedies without release assets (REQ-TOOL-025 rev 6, REQ-TOOL-024 rev 10 — meaning changes approved with the plan, re-verified in the same step). Before: STEP-T1-010/020 — the C "
     "implementation moved from encedo-hem-c-api 1.2.0 with its 27 REQ-TOOL requirements (same ids, "
     "`status: approved` = the specification; the C column is computed from the moved tags), the first "
     "conformance vectors, the process documents. The new REQs of milestone T1 (REQ-TOOL-029/030, "
@@ -11,7 +11,7 @@ STAMP = (
 
 # Appended to the Totals line.
 TOTALS_NOTE = (
-    "Milestone T1 (`c-v1.3.0`) is in progress: 010/020/030 done, 040–070 to go; REQ-PKG-001/002/004 and "
+    "Milestone T1 (`c-v1.3.0`) is in progress: 010–040 done, 050–070 to go; REQ-PKG-001/002/004 and "
     "REQ-TOOL-029/030 show their state from the gates and the CMake tags; REQ-PKG-003 opens with STEP-T1-040."
 )
 
