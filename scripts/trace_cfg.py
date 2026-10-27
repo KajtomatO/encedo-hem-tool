@@ -2,7 +2,7 @@
 
 # Generation stamp: what happened since the last matrix.
 STAMP = (
-    "Generated: 2026-10-27 (the repository's first matrix — STEP-T1-010/020 in progress: the C "
+    "Generated: 2026-10-27 (STEP-T1-010 and STEP-T1-020 DONE — the C "
     "implementation moved from encedo-hem-c-api 1.2.0 with its 27 REQ-TOOL requirements (same ids, "
     "`status: approved` = the specification; the C column is computed from the moved tags), the first "
     "conformance vectors, the process documents. The new REQs of milestone T1 (REQ-TOOL-029/030, "
@@ -11,8 +11,8 @@ STAMP = (
 
 # Appended to the Totals line.
 TOTALS_NOTE = (
-    "Milestone T1 (`c-v1.3.0`) is in progress; the cells of the REQ-TOOL set show `in progress` until "
-    "STEP-T1-010/020 close (their tags moved with the code and tests)."
+    "Milestone T1 (`c-v1.3.0`) is in progress: 010/020 done, 030–070 to go; REQ-PKG-001/002/004 and "
+    "REQ-TOOL-029/030 show their state from the gates and the CMake tags; REQ-PKG-003 opens with STEP-T1-040."
 )
 
 # Appended to the "implemented without a tagged test" bullet.

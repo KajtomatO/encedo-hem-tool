@@ -8,7 +8,7 @@ traces:
   architecture: ["ARCHITECTURE.md#5-implementations", "ARCHITECTURE.md#2-specification-and-conformance", "ARCHITECTURE.md#7-milestones"]
 depends_on: []
 evidence:
-  commits: []   # the first commit of the repository, when the user permits
+  commits: ["1abb352"]   # the initial import (user permission 2026-10-27); the done commit follows
   tests:
     - "2026-10-27, c/: `cmake -S . -B build -G Ninja && cmake --build build && ctest --test-dir build -L unit` (OpenSSL backend, gcc 13.3) — 21/21 after the backend-free gate was adapted to a tree without crypto_ref modules (20/21 before); `-DEHEM_CRYPTO_BACKEND=wolfssl` build tree 21/21; `CC=clang` build tree 21/21. `./dev test it` (the SDK checkout's hem.env sourced) — test_random_live 24.4 s + test_keys_rm_live 10.8 s, 2/2 against the dev device (fw v1.2.2-DIAG)."
   notes: null
@@ -57,4 +57,4 @@ the GitHub repository and pushes.
 - [x] The 27 REQ-TOOL files imported: same ids, `status: approved`
       (specification lifecycle), rev +1 with the move note, anchors
       retargeted to this ARCHITECTURE, `applies_to: ["c"]` on REQ-TOOL-024.
-- [ ] First commit of the repository (user permission) — `evidence.commits`.
+- [x] First commit of the repository (user permission 2026-10-27) — `1abb352`.
