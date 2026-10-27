@@ -245,7 +245,9 @@ c/                   the C implementation (a self-contained CMake project)
    links with the runner's current one. Plain C archives, no LTO, same UCRT:
    low risk; the Windows package-mode CI leg catches drift on every push.
    Fallback: build the release in submodule mode against the SDK's
-   `build-deps.sh` prefix.
+   `build-deps.sh` prefix. *Retired as a blocker 2026-10-27: the first push's
+   Windows package leg (C CI run 40529996276) and the release dry run
+   (40530024709) linked the 1.2.0 package's archives cleanly.*
 2. **A system OpenSSL found instead of the package's** in package mode —
    `OPENSSL_USE_STATIC_LIBS=ON` and `CMAKE_PREFIX_PATH` first; the ldd /
    objdump asserts fail the job otherwise.

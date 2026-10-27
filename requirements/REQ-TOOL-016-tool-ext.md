@@ -3,7 +3,7 @@ id: REQ-TOOL-016
 title: hem-tool ext family — pair (terminal QR), list, login
 status: approved
 priority: should
-revision: 6   # 2026-10-27 (STEP-T1-010): moved from encedo-hem-c-api at 1.2.0 (user decision 2026-10-27: hem-tool is its own deliverable; this repository holds the shared specification) — text unchanged; `status` is now the specification lifecycle (approved), the C implementation's state is the TRACE matrix's. Rev 5 = 2026-10-27 (STEP-M12-137 done): re-verified — the rev 3 unit criterion green on every CI leg (d532433 and a481d07) and both attended criteria met: the user's rc3 tests of 2026-10-20 (the Windows QR display the only finding) and, 2026-10-27, "Ext pair works on windows" from the published `v1.2.0-rc4` Windows hem-tool with Encedo HEM Auth 2.0.0-dev.8 — `ext list` shows the Samsung SM-S938B (Android) authenticator, kid 3dff0e4888f77b1e14e6812c17dbc4ce, [PROTECTED]. No meaning change. Rev 4 = 2026-10-20 (STEP-M12-137, the rc3 Windows finding): the terminal QR on a Windows console — the UTF-8 half-block rows showed as mojibake ("a mess of chars") because the console decodes stdout bytes in its OEM code page; `ext pair` now writes the rows as UTF-16 through the console API when stdout is a console (bytes otherwise). Annotation of the rendering clause + an attended criterion on `v1.2.0-rc4` — NO meaning change (the clause already promised a QR in the terminal; Windows showed none); status stays needs-reverify from rev 3. Rev 3 = 2026-10-20 (STEP-M12-137): MEANING CHANGE — the QR payload comes from the SDK's `ehem_ext_qr_payload()` (REQ-AUTH-008 rev 5: `hash` = base64(SHA-256(request)), the check the new Encedo Auth app makes); the tester's placeholder "not_implemented_yet" is gone from the flow text. §6.2 report approved with the plan 2026-10-20. needs-reverify until the unit criterion passes and the user's rc3 scan. Rev 2 = the M8-080 attended record (2026-08-05/06)
+revision: 7   # 2026-10-27 (STEP-T1-060): the QR-encoder bullet split into the shared rule (a local encoder, never a web service; the encoder belongs to the tool) and a C-only sentence (the vendored Nayuki qrcodegen in hem-tool-core) — wording only, no meaning change. Rev 6 = 2026-10-27 (STEP-T1-010): moved from encedo-hem-c-api at 1.2.0 (user decision 2026-10-27: hem-tool is its own deliverable; this repository holds the shared specification) — text unchanged; `status` is now the specification lifecycle (approved), the C implementation's state is the TRACE matrix's. Rev 5 = 2026-10-27 (STEP-M12-137 done): re-verified — the rev 3 unit criterion green on every CI leg (d532433 and a481d07) and both attended criteria met: the user's rc3 tests of 2026-10-20 (the Windows QR display the only finding) and, 2026-10-27, "Ext pair works on windows" from the published `v1.2.0-rc4` Windows hem-tool with Encedo HEM Auth 2.0.0-dev.8 — `ext list` shows the Samsung SM-S938B (Android) authenticator, kid 3dff0e4888f77b1e14e6812c17dbc4ce, [PROTECTED]. No meaning change. Rev 4 = 2026-10-20 (STEP-M12-137, the rc3 Windows finding): the terminal QR on a Windows console — the UTF-8 half-block rows showed as mojibake ("a mess of chars") because the console decodes stdout bytes in its OEM code page; `ext pair` now writes the rows as UTF-16 through the console API when stdout is a console (bytes otherwise). Annotation of the rendering clause + an attended criterion on `v1.2.0-rc4` — NO meaning change (the clause already promised a QR in the terminal; Windows showed none); status stays needs-reverify from rev 3. Rev 3 = 2026-10-20 (STEP-M12-137): MEANING CHANGE — the QR payload comes from the SDK's `ehem_ext_qr_payload()` (REQ-AUTH-008 rev 5: `hash` = base64(SHA-256(request)), the check the new Encedo Auth app makes); the tester's placeholder "not_implemented_yet" is gone from the flow text. §6.2 report approved with the plan 2026-10-20. needs-reverify until the unit criterion passes and the user's rc3 scan. Rev 2 = the M8-080 attended record (2026-08-05/06)
 source: user decision 2026-07-22 (M8 decomposition; "Add QR code generation to hem-tool" — user decision same day); hem-api-tester test_5.php QR payload (its `hash` placeholder — superseded by REQ-AUTH-008 rev 5, the Manager's definition); REQ-TOOL-012 family-in-one-REQ precedent; user bug report 2026-10-20 on v1.2.0-rc2 (the new Encedo Auth app refuses the QR: "the pairing link served a different request than the code promised") and user decision the same day: the SDK composes the payload; user bug report 2026-10-20 on v1.2.0-rc3 (Windows: "the QR code is a mess of chars and not a QR-Code"); moved from encedo-hem-c-api (requirements/REQ-TOOL-016-tool-ext.md at v1.2.0) by user decision 2026-10-27
 depends_on: ["REQ-AUTH-006", "REQ-AUTH-008", "REQ-AUTH-009", "REQ-AUTH-010", "REQ-KEY-001", "REQ-TOOL-005"]
 supersedes: null
@@ -34,14 +34,15 @@ including rendering the pairing QR code directly in the terminal.
   → broker `register/finalise` → print the new `kid` + label. Distinct
   nonzero exit codes: scan timeout, slots-full/dedup 406, broker error,
   auth error (the REQ-TOOL-003 style).
-- **QR encoder:** a vendored single-file MIT QR encoder (Project Nayuki
-  `qrcodegen`, C port) under the tool tree — vendored like cJSON
-  (REQ-BUILD-003 pattern: verbatim upstream + provenance note), compiled
-  ONLY into hem-tool/hem-tool-core, never into libencedo-hem, never
-  reachable from public headers (the existing header/export gates prove
-  it). NOT rendered via any web service — the tester's quickchart.io
-  approach ships `user`/`email`/`hostname` to a third party and is
-  explicitly rejected.
+- **QR encoder:** the QR is encoded locally, by code that is part of the
+  tool — NOT rendered via any web service: the hem-api-tester's
+  quickchart.io approach ships `user`/`email`/`hostname` to a third party
+  and is explicitly rejected. *C implementation:* a vendored single-file
+  MIT encoder (Project Nayuki `qrcodegen`, C port) under
+  `c/src/vendor/qrcodegen/` — verbatim upstream plus a provenance note,
+  compiled into hem-tool-core only; it never entered the SDK's
+  `libencedo-hem` (the SDK's header/export gates proved that while the
+  tool lived there).
 - **`ext list`:** `ehem_key_list` walk filtered to keys whose descriptor
   carries the `EXTAID` prefix; prints kid, label, and the pid (base64 of
   the 32-byte descriptor suffix). Real phones label themselves (e.g.
