@@ -3,7 +3,7 @@ id: REQ-PKG-003
 title: C implementation — release matrix: one-file hem-tool per OS, built against the checksum-verified SDK package of the pinned version, tagged c-v<version>
 status: approved
 priority: must
-revision: 1   # 2026-10-27: drafted with the split plan; approved with it (user decisions: one-file only; clean split; tags c-v<version>; version 1.3.0 first). Takes over the hem-tool half of the SDK's REQ-BUILD-005/009 and REQ-TOOL-026's concern (a companion library cannot be missing from a one-file binary)
+revision: 2   # 2026-10-27 (STEP-T1-070, the T1 gate): record only — the tag-path and attended criteria met on the user's `c-v1.3.0-rc1` (c-release run 40549324183 → pre-release 425769575, 3 assets; the user's Linux and Windows runs of the published binaries; the Linux archive smoke-tested on the dev host as well). No meaning change. Rev 1 = 2026-10-27: drafted with the split plan; approved with it (user decisions: one-file only; clean split; tags c-v<version>; version 1.3.0 first). Takes over the hem-tool half of the SDK's REQ-BUILD-005/009 and REQ-TOOL-026's concern (a companion library cannot be missing from a one-file binary)
 source: user decisions 2026-10-27 (ARCHITECTURE.md §1 items 1, 3, 4, 5); encedo-hem-c-api scripts/release/package-static.sh at v1.2.0 (the asserts of the one-file build), REQ-BUILD-009 rev 12 there (the SDK package contents), docs/RELEASING.md there (tag rules, annotated-tag release text); encedo-hem-c-api REQ-TOOL-026 (superseded by this REQ: the missing-DLL message has no DLL to miss)
 applies_to: ["c"]
 depends_on: ["REQ-PKG-001", "REQ-TOOL-025"]
@@ -70,13 +70,35 @@ packaging checks, carried over so the split loses no guarantee.
       `status` on a closed port exit 1, the null-provider `OPENSSL_CONF`
       exit 12 with the configuration remedy; SHA256SUMS written. The
       Windows half and the tag rule run in the workflows (STEP-T1-050).)*
-- [ ] `c-release.yml`: a branch run yields the two archives + `SHA256SUMS`
+- [x] `c-release.yml`: a branch run yields the two archives + `SHA256SUMS`
       as artifacts; the user's `c-v1.3.0-rc1` publishes the pre-release with
-      3 assets (run id, release id recorded; STEP-T1-050/070). *(Half met
+      3 assets (run id, release id recorded; STEP-T1-050/070). *(Branch half
       2026-10-27: the push to `main` ran 40530024709 — Linux 0:23, Windows
       2:25, every assert of package.sh green on both platforms, artifacts
       release-linux-x86_64 and release-windows-x86_64, the publish job
-      skipped as designed. The tag half is STEP-T1-070's.)*
-- [ ] Attended (the user, STEP-T1-070): the published Linux and Windows
+      skipped as designed. Tag half 2026-10-27 (STEP-T1-070): the user's
+      annotated `c-v1.3.0-rc1` on 3c1976e ran 40549324183 — Linux 0:30,
+      Windows 2:18, publish 0:12, every assert green — and published the
+      pre-release 425769575 "hem-tool 1.3.0-rc1" with
+      `hem-tool-1.3.0-rc1-linux-x86_64.tar.gz`,
+      `hem-tool-1.3.0-rc1-windows-x86_64.zip` and a two-line `SHA256SUMS`
+      re-verified in the publish job; the release text = the tag's
+      annotation followed by the checksums. C CI ran green on the tag too
+      (40549324395, 6/6).)*
+- [x] Attended (the user, STEP-T1-070): the published Linux and Windows
       binaries run `status` under system trust, `--version` shows the SDK
-      pin, `ext list` works — recorded here.
+      pin, `ext list` works — recorded here. *(Met 2026-10-27 on the
+      published `c-v1.3.0-rc1` assets: the user, Linux and Windows, each
+      binary unpacked alone — `--version`, `status` under system trust,
+      `ext list`: "It works". The Linux archive repeated on the dev host:
+      `sha256sum -c SHA256SUMS --ignore-missing` → `OK`; the directory holds
+      `hem-tool`, `README.txt` (tool 1.3.0-rc1, SDK 1.2.0, OpenSSL 3.5.9,
+      libcurl 8.10.1, glibc floor) and seven LICENSES; `ldd` = linux-vdso,
+      libc, ld-linux, no RUNPATH; with `env -i` and
+      `--url https://my.ence.do` (system trust): `--version` →
+      `hem-tool 1.3.0` / `sdk:       encedo-hem 1.2.0` /
+      `crypto:    OpenSSL 3.5.9 (compiled) / 3.5.9 (loaded), static` /
+      `transport: libcurl 8.10.1 (compiled) / 8.10.1 (loaded), static`;
+      `help` and `keys types` exit 0; `status` → firmware v1.2.2-DIAG,
+      exit 0; `ext list` with the bearer → the one paired authenticator
+      (Samsung SM-S938B, PROTECTED), exit 0.)*

@@ -229,12 +229,19 @@ c/                   the C implementation (a self-contained CMake project)
     committed TRACE generator (STEP-T1-060).
   - *Out of scope:* any behaviour change of the CLI (BACKLOG items 6–12
     wait); other implementations.
-  - **Gate (draft):** CI green on both platforms in both SDK modes; the
-    user's annotated `c-v1.3.0-rc1` publishes the pre-release (2 archives +
-    `SHA256SUMS`); the user runs the published binaries on Linux and Windows
-    (`status` under system trust, `--version` showing `sdk: encedo-hem
-    1.2.0`, `ext list`); docs checklist; TRACE with the C column complete;
-    then `c-v1.3.0` (STEP-T1-070).
+  - **Gate PASSED (2026-10-27):** C CI 6/6 on `development` (run
+    40549249453 on 3c1976e) and on the tag (40549324395); the user's
+    annotated `c-v1.3.0-rc1` ran c-release 40549324183 (Linux 0:30, Windows
+    2:18, publish 0:12) and published the pre-release 425769575 "hem-tool
+    1.3.0-rc1" — the two archives and `SHA256SUMS`, re-verified in the
+    publish job; attended: the user ran the published Linux and Windows
+    binaries (`--version`, `status` under system trust, `ext list`) — "It
+    works"; the Linux archive repeated on the dev host (checksum OK,
+    glibc-only, `--version` with `sdk: encedo-hem 1.2.0`, `status` →
+    firmware v1.2.2-DIAG, `ext list` → the paired phone); docs checklist;
+    TRACE with the C column complete (28 verified, 5 implemented with their
+    reasons). `c-v1.3.0` = merge `development` → `main` and the annotated
+    tag (the user; STEP-T1-070).
   - *Decomposition (2026-10-27):* STEP-T1-010 … 070 in order, 010 and 020
     started together (the skeleton is only proven by the tests).
 
