@@ -37,11 +37,16 @@ package-mode legs are the early, every-push proof of the release link path
 (the Windows one proves the runner's GCC links the SDK package's archives).
 
 **Acceptance criteria:**
-- [ ] `ctest -L unit` lists the 18 tests, `tool_startup_cli` and the gates;
+- [x] `ctest -L unit` lists the 18 tests, `tool_startup_cli` and the gates;
       `ctest -L integration` → `test_random_live`, `test_keys_rm_live`;
       `ctest -L disruptive` → `test_cert_install_live`; the live ones skip
-      (77) without `EHEM_TEST_URL` *(local 2026-10-27: 21 unit tests green
-      on gcc/clang, OpenSSL/wolfSSL; the two integration tests green against
-      the dev device — STEP-T1-010)*.
-- [ ] `c-ci.yml` — 6 legs green on the user's first push (run id recorded;
-      STEP-T1-050).
+      (77) without `EHEM_TEST_URL` *(local 2026-10-27: 23 unit tests — 18 +
+      tool_startup_cli + 4 gates — green on gcc/clang, OpenSSL/wolfSSL; the
+      two integration tests green against the dev device — STEP-T1-010/020;
+      with EHEM_TEST_URL unset both integration tests and, without
+      EHEM_ALLOW_DISRUPTIVE, the disruptive test report "Skipped" (exit 77)
+      — STEP-T1-060)*.
+- [x] `c-ci.yml` — 6 legs green on the user's first push (run id recorded;
+      STEP-T1-050). *(2026-10-27, run 40529996276 on 7d7c84e: Linux gcc /
+      clang / wolfSSL submodule legs and the package leg, Windows UCRT64
+      submodule and package legs — 6/6; every leg's pin check passed.)*

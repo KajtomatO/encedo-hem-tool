@@ -4,8 +4,10 @@
  * is 7-bit ASCII. Copied from the SDK's REQ-API-009 gate at 1.2.0. A UTF-8 em dash in a message prints
  * as mojibake in a Windows console that uses a legacy code page (found
  * 2026-10-10 on the first Windows test of the release binary). Comments are
- * not checked — they never reach a user.
+ * not checked — they never reach a user. The gate is the implementation of
+ * the rule as well as its proof (the sources themselves carry no tag for it).
  *
+ * implements: REQ-TOOL-029
  * verifies: REQ-TOOL-029
  *
  * Usage: check_ascii_strings <file>...

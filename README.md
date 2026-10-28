@@ -7,15 +7,17 @@ initialisation and wipe, and pairing of the Encedo Auth phone app. One
 specification ([requirements/](requirements/), [ARCHITECTURE.md](ARCHITECTURE.md) §3),
 implemented per language SDK.
 
-> **Status:** milestone T1 in progress — the C implementation moved here from
+> **Status: hem-tool 1.3.0 (2026-10-27)** — the first release from this
+> repository: the C implementation, moved here from
 > [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) at its
-> 1.2.0 (2026-10-27) and ships next as **hem-tool 1.3.0** (`c-v1.3.0`). Until
-> then the latest hem-tool binaries are those of the SDK's
-> [1.2.0 release](https://github.com/KajtomatO/encedo-hem-c-api/releases/tag/v1.2.0).
+> 1.2.0 and built on that SDK (milestone T1; gate passed 2026-10-27, tested
+> as `c-v1.3.0-rc1` on Linux and Windows). Binaries: the
+> [latest release](https://github.com/KajtomatO/encedo-hem-tool/releases/latest)
+> here; the SDK's own releases carry no hem-tool from its 1.3.0 on.
 
 | Implementation | Directory | SDK | Version | Platforms |
 |---|---|---|---|---|
-| C | [`c/`](c/) | [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) 1.2.0 (pinned, `c/cmake/sdk-version.cmake`) | 1.3.0 (in progress) | Linux x86_64, Windows x86_64 |
+| C | [`c/`](c/) | [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) 1.2.0 (pinned, `c/cmake/sdk-version.cmake`) | **1.3.0** (`c-v1.3.0`, 2026-10-27) | Linux x86_64, Windows x86_64 |
 
 ## Download
 
