@@ -80,8 +80,9 @@ git push origin c-v1.3.0-rc1
 ```
 
 Wait for the run (Actions → c-release; the `c-v1.3.0-rc1` run of 2026-10-27
-took 2:37 end to end — Linux 0:30, Windows 2:18, publish 0:12; C CI runs on
-the tag as well, 6:20 with the wolfSSL leg), then check the pre-release: two
+took 2:37 end to end — Linux 0:30, Windows 2:18, publish 0:12; the final
+`c-v1.3.0` run of 2026-10-28 2:48; C CI runs on the tag as well, 2–6
+minutes depending on the wolfSSL leg's cache), then check the pre-release: two
 archives + `SHA256SUMS`. Test as a user would, on both platforms:
 
 1. Download the archive for your platform and `SHA256SUMS`; verify

@@ -7,7 +7,7 @@ initialisation and wipe, and pairing of the Encedo Auth phone app. One
 specification ([requirements/](requirements/), [ARCHITECTURE.md](ARCHITECTURE.md) §3),
 implemented per language SDK.
 
-> **Status: hem-tool 1.3.0 (2026-10-27)** — the first release from this
+> **Status: hem-tool 1.3.0 (2026-10-28)** — the first release from this
 > repository: the C implementation, moved here from
 > [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) at its
 > 1.2.0 and built on that SDK (milestone T1; gate passed 2026-10-27, tested
@@ -17,7 +17,7 @@ implemented per language SDK.
 
 | Implementation | Directory | SDK | Version | Platforms |
 |---|---|---|---|---|
-| C | [`c/`](c/) | [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) 1.2.0 (pinned, `c/cmake/sdk-version.cmake`) | **1.3.0** (`c-v1.3.0`, 2026-10-27) | Linux x86_64, Windows x86_64 |
+| C | [`c/`](c/) | [encedo-hem-c-api](https://github.com/KajtomatO/encedo-hem-c-api) 1.2.0 (pinned, `c/cmake/sdk-version.cmake`) | **1.3.0** (`c-v1.3.0`, 2026-10-28) | Linux x86_64, Windows x86_64 |
 
 ## Download
 

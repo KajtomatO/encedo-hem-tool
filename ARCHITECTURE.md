@@ -242,6 +242,14 @@ c/                   the C implementation (a self-contained CMake project)
     TRACE with the C column complete (28 verified, 5 implemented with their
     reasons). `c-v1.3.0` = merge `development` → `main` and the annotated
     tag (the user; STEP-T1-070).
+  - **Released 2026-10-28:** `development` merged into `main` as 557f31e
+    ("Release hem-tool 1.3.0"; the push ran c-release 40726619654 as a dry
+    run), the user's annotated `c-v1.3.0` on it ran 40726685046 → release
+    426920956 "hem-tool 1.3.0" with `hem-tool-1.3.0-linux-x86_64.tar.gz`,
+    `hem-tool-1.3.0-windows-x86_64.zip` and `SHA256SUMS`; the published
+    Linux asset smoke-tested on the dev host (checksum, `--version`,
+    `status` under system trust, `ext list`). The SDK's M13 may now remove
+    hem-tool from encedo-hem-c-api.
   - *Decomposition (2026-10-27):* STEP-T1-010 … 070 in order, 010 and 020
     started together (the skeleton is only proven by the tests).
 

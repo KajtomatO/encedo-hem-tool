@@ -3,7 +3,7 @@ id: REQ-PKG-003
 title: C implementation — release matrix: one-file hem-tool per OS, built against the checksum-verified SDK package of the pinned version, tagged c-v<version>
 status: approved
 priority: must
-revision: 2   # 2026-10-27 (STEP-T1-070, the T1 gate): record only — the tag-path and attended criteria met on the user's `c-v1.3.0-rc1` (c-release run 40549324183 → pre-release 425769575, 3 assets; the user's Linux and Windows runs of the published binaries; the Linux archive smoke-tested on the dev host as well). No meaning change. Rev 1 = 2026-10-27: drafted with the split plan; approved with it (user decisions: one-file only; clean split; tags c-v<version>; version 1.3.0 first). Takes over the hem-tool half of the SDK's REQ-BUILD-005/009 and REQ-TOOL-026's concern (a companion library cannot be missing from a one-file binary)
+revision: 3   # 2026-10-28 (hem-tool 1.3.0 released): record only — the final tag path: the user's annotated `c-v1.3.0` on 557f31e (the merge of development into main) ran 40726685046 → release 426920956 "hem-tool 1.3.0", 3 assets; the push to main itself ran 40726619654 (publish skipped, artifacts only); the published Linux asset smoke-tested on the dev host. No meaning change. Rev 2 = 2026-10-27 (STEP-T1-070, the T1 gate): record only — the tag-path and attended criteria met on the user's `c-v1.3.0-rc1` (c-release run 40549324183 → pre-release 425769575, 3 assets; the user's Linux and Windows runs of the published binaries; the Linux archive smoke-tested on the dev host as well). No meaning change. Rev 1 = 2026-10-27: drafted with the split plan; approved with it (user decisions: one-file only; clean split; tags c-v<version>; version 1.3.0 first). Takes over the hem-tool half of the SDK's REQ-BUILD-005/009 and REQ-TOOL-026's concern (a companion library cannot be missing from a one-file binary)
 source: user decisions 2026-10-27 (ARCHITECTURE.md §1 items 1, 3, 4, 5); encedo-hem-c-api scripts/release/package-static.sh at v1.2.0 (the asserts of the one-file build), REQ-BUILD-009 rev 12 there (the SDK package contents), docs/RELEASING.md there (tag rules, annotated-tag release text); encedo-hem-c-api REQ-TOOL-026 (superseded by this REQ: the missing-DLL message has no DLL to miss)
 applies_to: ["c"]
 depends_on: ["REQ-PKG-001", "REQ-TOOL-025"]
@@ -84,7 +84,16 @@ packaging checks, carried over so the split loses no guarantee.
       `hem-tool-1.3.0-rc1-windows-x86_64.zip` and a two-line `SHA256SUMS`
       re-verified in the publish job; the release text = the tag's
       annotation followed by the checksums. C CI ran green on the tag too
-      (40549324395, 6/6).)*
+      (40549324395, 6/6). Final 2026-10-28: `development` merged into
+      `main` as 557f31e ("Release hem-tool 1.3.0") — the push ran
+      40726619654 (Linux 0:25, Windows 2:26, publish skipped) — and the
+      user's annotated `c-v1.3.0` on the same commit ran 40726685046
+      (Linux 0:24, Windows 2:18, publish 0:20) → release 426920956
+      "hem-tool 1.3.0" (not a pre-release) with
+      `hem-tool-1.3.0-linux-x86_64.tar.gz`,
+      `hem-tool-1.3.0-windows-x86_64.zip` and `SHA256SUMS`; the release
+      text = the tag's notes followed by the checksums (58 lines). C CI
+      green on `main` (40726619618) and on the tag (40726685122).)*
 - [x] Attended (the user, STEP-T1-070): the published Linux and Windows
       binaries run `status` under system trust, `--version` shows the SDK
       pin, `ext list` works — recorded here. *(Met 2026-10-27 on the
@@ -101,4 +110,12 @@ packaging checks, carried over so the split loses no guarantee.
       `transport: libcurl 8.10.1 (compiled) / 8.10.1 (loaded), static`;
       `help` and `keys types` exit 0; `status` → firmware v1.2.2-DIAG,
       exit 0; `ext list` with the bearer → the one paired authenticator
-      (Samsung SM-S938B, PROTECTED), exit 0.)*
+      (Samsung SM-S938B, PROTECTED), exit 0. The final
+      `hem-tool-1.3.0-linux-x86_64.tar.gz` repeated the same way on
+      2026-10-28: checksum `OK`, the same directory contents (README.txt
+      naming tag `c-v1.3.0`), `ldd` glibc only, no RUNPATH, the same four
+      `--version` lines, `status` → firmware v1.2.2-DIAG exit 0, `ext list`
+      → the paired authenticator exit 0 — its first attempt got a transient
+      `HTTP 401` from `/api/auth/token`; the immediate re-run and a
+      `keys list` with the rc1 binary succeeded, so the device, not the
+      binary.)*
